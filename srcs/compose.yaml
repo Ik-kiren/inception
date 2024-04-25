@@ -1,0 +1,19 @@
+services:
+  nginx:
+    depends_on:
+      - wordpress
+    build: ./nginx
+  mariadb:
+    build: ./mariadb
+    healthcheck:
+      test: mariadb --user=root
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 5s
+  wordpress:
+    build: ./wordpress
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      
