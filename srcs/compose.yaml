@@ -2,18 +2,43 @@ services:
   nginx:
     depends_on:
       - wordpress
-    build: ./nginx
+    build: ./requirements/nginx
+    ports:
+      - "443:443"
+    volumes:
+      - wp-data:/wordpress
   mariadb:
-    build: ./mariadb
+    build: ./requirements/mariadb
+    expose:
+      - "3306:3306"
     healthcheck:
       test: mariadb --user=root
       interval: 5s
       timeout: 10s
       retries: 20
       start_period: 5s
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
   wordpress:
-    build: ./wordpress
+    build: ./requirements/wordpress
+    expose:
+      - 9000:9000
+    environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - WP_ADMIN=${WP_ADMIN}
+      - WP_PASSWORD=${WP_PASSWORD}
     depends_on:
       mariadb:
         condition: service_healthy
+    volumes:
+      - wp-data:/wordpress
+volumes:
+  db-data:
+  wp-data:
       
