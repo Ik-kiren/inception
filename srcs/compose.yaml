@@ -1,12 +1,16 @@
 services:
   nginx:
     depends_on:
-      - wordpress
+      wordpress:
+       condition: service_healthy
     build: ./requirements/nginx
     ports:
       - "443:443"
     volumes:
-      - wp-data:/wordpress
+      - wordpress:/wordpress
+    networks:
+      - inception
+    restart: always
   mariadb:
     build: ./requirements/mariadb
     expose:
@@ -22,23 +26,44 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - db-data:/var/lib/mysql
+      - db:/var/lib/mysql
+    networks:
+      - inception
+    restart: always
   wordpress:
     build: ./requirements/wordpress
     expose:
       - 9000:9000
+    healthcheck:
+      test: netstat -an | grep :9000
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 5s
     environment:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - WP_ADMIN=${WP_ADMIN}
       - WP_PASSWORD=${WP_PASSWORD}
+      - WP_FABIOPASS=${WP_FABIOPASS}
     depends_on:
       mariadb:
         condition: service_healthy
     volumes:
-      - wp-data:/wordpress
+      - wordpress:/wordpress
+    networks:
+      - inception
+    restart: always
 volumes:
-  db-data:
-  wp-data:
+  db:
+      name: db
+  wordpress:
+      name: wordpress
+      driver_opts:
+        type: "none"
+        o: bind
+        device: /home/cdupuis/data/wordpress
+networks:
+  inception:
       
