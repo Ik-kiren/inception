@@ -57,7 +57,11 @@ services:
     restart: always
 volumes:
   db:
-      name: db
+      name: mariadb
+      driver_opts:
+        type: "none"
+        o: bind
+        device: /home/cdupuis/data/mariadb
   wordpress:
       name: wordpress
       driver_opts:
