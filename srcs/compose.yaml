@@ -26,7 +26,7 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - db:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     networks:
       - inception
     restart: always
@@ -56,7 +56,7 @@ services:
       - inception
     restart: always
 volumes:
-  db:
+  mariadb:
       name: mariadb
       driver_opts:
         type: "none"
